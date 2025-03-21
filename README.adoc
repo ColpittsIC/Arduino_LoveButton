@@ -1,6 +1,6 @@
-= FDC1004 Library for Arduino =
+= Aruino Love Touch Button Library for Arduino =
 
-Allows you to read the capacitance values from the Modulino Farad
+Allows you to use the Love Button on Arduino as a Capacitive Button
 
 
 == License ==
