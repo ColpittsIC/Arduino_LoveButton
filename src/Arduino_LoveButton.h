@@ -10,7 +10,7 @@
 #define ARDUINO_LOVEBUTTON_H
 
 #if !defined(ARDUINO_UNOR4_WIFI) && !defined(ARDUINO_UNOR4_MINIMA)
-#error Sorry, but LoveButton only works on the Arduino UNO-R4 Minima and Arduino UNO-R4 WiFi
+#error Library only working on UNO-R4 BOARDS
 #endif
 
 #include "Arduino.h"
@@ -23,17 +23,21 @@
 #define TPS_PIN     12
 
 #ifdef ARDUINO_UNOR4_WIFI
-#define CTSUMCH0_LOVE  0x1B //select pin TS27
+#define CTSUMCH0_LOVE  0x1B //TS27
 #define LOVE_PORT 1
-#define LOVE_PIN 13 //Love is on P113
-#define CTSUCHAC_IDX 3 //TS27 is on CTSUCHAC[3] = 1 << 3
-#define CTSUCHAC_VALUE 1<<3
+#define LOVE_PIN 13 //Capacitive button connected to pin P113
+//There are 5 CTSUCHAC registers to cover all the 33 CTSU Pin available 
+//In Arduino UNO R4_WIFI the capacitive pin is connected on pin TS27 -> CTSUCHAC[3]
+#define CTSUCHAC_IDX 3 //TS27 is on CTSUCHAC[3] = (1 << 3)
+#define CTSUCHAC_VALUE (1<<3)
 #endif
 
 #ifdef ARDUINO_UNOR4_MINIMA
-#define CTSUMCH0_LOVE  0 // select pin TS0
+#define CTSUMCH0_LOVE  0 //TS00
 #define LOVE_PORT 2
-#define LOVE_PIN 4 //Love is on P204
+#define LOVE_PIN 4 //Capacitive button connected to pin P204
+//There are 5 CTSUCHAC registers to cover all the 33 CTSU Pin available 
+//In Arduino UNO R4_WIFI the capacitive pin is connected on pin TS00 -> CTSUCHAC[0]
 #define CTSUCHAC_IDX 0 //TS00 is on CTSUCHAC[0] = 1
 #define CTSUCHAC_VALUE 1
 #endif
@@ -95,27 +99,27 @@ public:
     uint16_t threshold;
     Arduino_LoveButton_Class() : threshold(23000) {}
 
+    public:
     void begin();
     bool read_touch();
     uint16_t read_value();
     void setThreshold(uint16_t t);
 
-
+    private:
+    static void startCTSUmeasure();
+    static void CTSURD_handler();
+    static void CTSUWR_handler();
+    static int  createEventLinkInterrupt(uint8_t eventCode, Irq_f func = nullptr);
+    static void resetEventLinkInterrupt(int eventLinkIndex);
 
 };
 
+
+
+
+
+
 extern Arduino_LoveButton_Class Arduino_Love;
-namespace LB_NAMESPACE
-{
-
-    void startCTSUmeasure();
-    void CTSURD_handler();
-    void CTSUWR_handler();
-
-    int attachEventLinkInterrupt(uint8_t eventCode, Irq_f func = nullptr);
-    void resetEventLink(int eventLinkIndex);
-
-}
 
 
 
