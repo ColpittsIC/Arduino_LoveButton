@@ -1,61 +1,59 @@
 /*
+    Arduino Love Button Library
 
-LoveButton  --  Capacitive Touch Sensing for the Love Pin on the Arduino UNO-R4 Minima
-     Copyright (C) 2023  David C.
+    Copyright (c) 2023 Arduino SA
 
-     R4-Wifi compatability added by Winnie S.
-
-     This program is free software: you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
-
-     This program is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-     GNU General Public License for more details.
-
-     You should have received a copy of the GNU General Public License
-     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-     */
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
 
 /*
-This example requires installing a 1uF ceramic capacitor between 
-pin 10 and ground on the Arduino UNO-R4 Minima or between 
-pin 7 and ground on the Arduino UNO-R4 WiFi.  
+The example works also without installing any capacitor on the Pin 
+To obtain a better signal just install a capacitor 
+-PIN 10 of Arduino UNO-R4 Minima 
+-PIN 7  of Arduino UNO-R4 Wifi
 
-Try to ensure that the leads are kept as short as possible.  
+If you touch the heart shaped pad on the bottom of the PCB it will behave as a capacitive touch button
 
-Touch the small heart shaped blob of solder on the back of the board
-to toggle the built-in LED on pin 13.  
+You can interact with the library in 2 ways 
+-read_touch() : You can set a threshold using setThreshold(threshold) 
+                If the value read by the touch sensor exceed the threshold value, the read_touch() funtion
+                will toogle it's returned value.
+                Comparing new value with old value will let you understand if a Touch Event happened
+-read_value() : It will return the raw value from the Capacitive sensor
+
 */
 
 #include "Arduino_LoveButton.h"
 
-bool oldTouch = false;
-uint8_t ledState = LOW;
-uint16_t touch_value;
+bool      oldValue = false;
+uint8_t   ledState = LOW;
+uint16_t  sensValue;
 
 void setup() {
   Serial.begin(115200);
+  // Built-In LED 
   pinMode(13, OUTPUT);
-  Arduino_Love.begin();  // Start the capacitive sensor
+  Arduino_Love.begin();  
   Arduino_Love.setThreshold(10000);
 }
 
 void loop() {
-  // read the touch sensor and store the result
-  bool touch = Arduino_Love.read_touch();
-  touch_value = Arduino_Love.read_value();
-  Serial.print("Read Value from CTSU peripheral ");
-  Serial.println(touch_value);
-  if (touch && !oldTouch) {
-    // if there's a new touch.
-    // toggle the led state
+  //Check if a Touch event happened
+  bool newValue = Arduino_Love.read_touch();
+
+  //Read the Raw Data from the sensor
+  sensValue = Arduino_Love.read_value();
+  Serial.print("Read RAW Value from CTSU peripheral ");
+  Serial.println(sensValue);
+
+  //Compare old value with new one to undestand if a Touch event Happened
+  if (newValue && !oldValue) {
+    //Toogle the LED state in case of a Touch Event
     ledState = 1 - ledState;
     digitalWrite(13, ledState);
   }
-  oldTouch = touch;  // save the state for next time
+  oldValue = newValue;  // save the state for next time
   delay(50);         // for debounce a little
 }
